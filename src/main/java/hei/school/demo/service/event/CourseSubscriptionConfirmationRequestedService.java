@@ -25,8 +25,6 @@ import org.springframework.stereotype.Service;
 public class CourseSubscriptionConfirmationRequestedService
     implements Consumer<CourseSubscriptionConfirmationRequested> {
 
-  private static final Duration LINK_EXPIRATION = Duration.ofDays(7);
-
   private final Mailer mailer;
   private final BucketComponent bucketComponent;
   private final TicketPdfGenerator ticketPdfGenerator;
@@ -37,7 +35,7 @@ public class CourseSubscriptionConfirmationRequestedService
     var recipientAddress = new InternetAddress(event.getUserEmail());
 
     byte[] pdfBytes =
-        ticketPdfGenerator.generate(event.getUserName(), event.getCourseTitle(), Instant.now());
+        ticketPdfGenerator.generate(event.getUserEmail(), event.getCourseTitle(), Instant.now());
 
     String bucketKey = "tickets/" + event.getUserId() + "-" + event.getCourseId() + ".pdf";
     File tempFile = createTempFile("ticket-", ".pdf");
@@ -46,7 +44,7 @@ public class CourseSubscriptionConfirmationRequestedService
     }
     bucketComponent.upload(tempFile, bucketKey);
 
-    String downloadLink = bucketComponent.presign(bucketKey, LINK_EXPIRATION).toString();
+    String downloadLink = bucketComponent.presign(bucketKey, Duration.ofDays(7)).toString();
 
     mailer.accept(
         new Email(
@@ -54,25 +52,16 @@ public class CourseSubscriptionConfirmationRequestedService
             List.of(),
             List.of(),
             "Confirmation d'inscription",
-            buildEmailBody(event.getUserName(), event.getCourseTitle(), downloadLink),
+            "<p>Bonjour,</p>"
+                + "<p>Vous êtes bien inscrit au cours : <strong>"
+                + event.getCourseTitle()
+                + "</strong>.</p>"
+                + "<p>Voici le lien pour télécharger votre ticket : "
+                + "<a href=\""
+                + downloadLink
+                + "\">Télécharger le ticket</a></p>",
             List.of()));
 
     log.info("Ticket uploaded and email sent for user {}", event.getUserId());
-  }
-
-  private String buildEmailBody(String userName, String courseTitle, String downloadLink) {
-    return "<p>Bonjour "
-        + userName
-        + ",</p>"
-        + "<p>Inscription réussie au cours : <strong>"
-        + courseTitle
-        + "</strong></p>"
-        + "<p>Voici le lien pour télécharger votre ticket : "
-        + "<a href=\""
-        + downloadLink
-        + "\">Télécharger le ticket</a></p>"
-        + "<p><em>Le lien va expirer dans "
-        + LINK_EXPIRATION.toDays()
-        + " jours.</em></p>";
   }
 }

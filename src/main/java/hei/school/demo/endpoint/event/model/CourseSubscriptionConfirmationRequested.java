@@ -19,7 +19,6 @@ public class CourseSubscriptionConfirmationRequested extends PojaEvent {
   private UUID userId;
   private UUID courseId;
   private String userEmail;
-  private String userName;
   private String courseTitle;
 
   @Override
