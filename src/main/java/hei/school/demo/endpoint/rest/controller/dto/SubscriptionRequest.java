@@ -1,7 +1,0 @@
-package hei.school.demo.endpoint.rest.controller.dto;
-
-import java.util.UUID;
-import lombok.Builder;
-
-@Builder
-public record SubscriptionRequest(UUID userId) {}
