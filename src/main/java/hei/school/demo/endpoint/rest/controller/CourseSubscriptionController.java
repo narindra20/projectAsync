@@ -3,13 +3,10 @@ package hei.school.demo.endpoint.rest.controller;
 import hei.school.demo.endpoint.event.EventProducer;
 import hei.school.demo.endpoint.event.model.CourseSubscriptionConfirmationRequested;
 import hei.school.demo.repository.CourseRepository;
-import hei.school.demo.repository.SubscriptionRepository;
 import hei.school.demo.repository.UserRepository;
 import hei.school.demo.repository.model.Course;
-import hei.school.demo.repository.model.Subscription;
 import hei.school.demo.repository.model.User;
 import jakarta.persistence.EntityNotFoundException;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -26,13 +23,12 @@ public class CourseSubscriptionController {
 
   private final UserRepository userRepository;
   private final CourseRepository courseRepository;
-  private final SubscriptionRepository subscriptionRepository;
   private final EventProducer<CourseSubscriptionConfirmationRequested> eventProducer;
 
   @PostMapping("/courses/{courseId}/subscribe")
   @Transactional
   public ResponseEntity<Void> subscribe(
-      @PathVariable String courseId, @RequestBody SubscribeToCourseRequest request) {
+      @PathVariable UUID courseId, @RequestBody SubscribeToCourseRequest request) {
 
     User user =
         userRepository
@@ -43,18 +39,12 @@ public class CourseSubscriptionController {
             .findById(courseId)
             .orElseThrow(() -> new EntityNotFoundException("Course not found"));
 
-    if (subscriptionRepository
-        .findByUser_IdAndCourse_Id(user.getId(), course.getId())
-        .isPresent()) {
+    if (user.getCourses().contains(course)) {
       throw new IllegalStateException("User already subscribed to this course");
     }
 
-    var subscription = new Subscription();
-    subscription.setId(UUID.randomUUID().toString());
-    subscription.setUser(user);
-    subscription.setCourse(course);
-    subscription.setSubscribedAt(Instant.now());
-    subscriptionRepository.save(subscription);
+    user.getCourses().add(course);
+    userRepository.save(user);
 
     eventProducer.accept(
         List.of(
@@ -68,5 +58,5 @@ public class CourseSubscriptionController {
     return ResponseEntity.ok().build();
   }
 
-  public record SubscribeToCourseRequest(String userId) {}
+  public record SubscribeToCourseRequest(UUID userId) {}
 }
