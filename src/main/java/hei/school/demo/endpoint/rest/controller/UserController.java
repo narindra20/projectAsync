@@ -2,7 +2,9 @@ package hei.school.demo.endpoint.rest.controller;
 
 import hei.school.demo.repository.UserRepository;
 import hei.school.demo.repository.model.User;
+import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +25,11 @@ public class UserController {
             .email(request.email())
             .build();
     return userRepository.save(user);
+  }
+
+  @GetMapping("/users")
+  public List<User> getAll() {
+    return userRepository.findAll();
   }
 
   public record CreateUserRequest(

@@ -54,6 +54,7 @@ public class CourseSubscriptionController {
                 .userId(user.getId())
                 .courseId(course.getId())
                 .userEmail(user.getEmail())
+                .userName(user.getFirstName() + " " + user.getLastName())
                 .courseTitle(course.getTitle())
                 .build()));
 
