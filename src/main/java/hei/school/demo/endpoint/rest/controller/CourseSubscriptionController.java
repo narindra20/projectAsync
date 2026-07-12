@@ -25,7 +25,7 @@ public class CourseSubscriptionController {
 
   private final UserRepository userRepository;
   private final CourseRepository courseRepository;
-  private final EventProducer<CourseSubscriptionConfirmationRequested> eventProducer;
+  private final EventProducer eventProducer;
 
   @PostMapping("/courses/{courseId}/subscribe")
   @Transactional
@@ -48,18 +48,14 @@ public class CourseSubscriptionController {
     user.getCourses().add(course);
     userRepository.save(user);
 
-    try {
-      eventProducer.accept(
-          List.of(
-              CourseSubscriptionConfirmationRequested.builder()
-                  .userId(user.getId())
-                  .courseId(course.getId())
-                  .userEmail(user.getEmail())
-                  .courseTitle(course.getTitle())
-                  .build()));
-    } catch (Exception e) {
-      log.error("Failed to send event for course subscription confirmation", e);
-    }
+    eventProducer.accept(
+        List.of(
+            CourseSubscriptionConfirmationRequested.builder()
+                .userId(user.getId())
+                .courseId(course.getId())
+                .userEmail(user.getEmail())
+                .courseTitle(course.getTitle())
+                .build()));
 
     return ResponseEntity.ok().build();
   }
