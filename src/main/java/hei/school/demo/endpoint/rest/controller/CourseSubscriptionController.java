@@ -23,7 +23,7 @@ public class CourseSubscriptionController {
 
   private final UserRepository userRepository;
   private final CourseRepository courseRepository;
-  private final EventProducer eventProducer;
+  private final EventProducer<CourseSubscriptionConfirmationRequested> eventProducer;
 
   @PostMapping("/courses/{courseId}/subscribe")
   @Transactional
