@@ -151,6 +151,7 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
     testImplementation 'org.junit-pioneer:junit-pioneer:2.2.0'
 
+<dependency>   <groupId>org.apache.pdfbox</groupId>   <artifactId>pdfbox</artifactId>   <version>3.0.3</version> </dependency>
 
 
 }
