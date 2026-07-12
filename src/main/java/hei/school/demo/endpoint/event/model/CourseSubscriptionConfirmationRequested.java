@@ -2,6 +2,7 @@ package hei.school.demo.endpoint.event.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Duration;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,10 +19,10 @@ import lombok.ToString;
 public class CourseSubscriptionConfirmationRequested extends PojaEvent {
 
   @JsonProperty("userId")
-  private String userId;
+  private UUID userId;
 
   @JsonProperty("courseId")
-  private String courseId;
+  private UUID courseId;
 
   @JsonProperty("userEmail")
   private String userEmail;
