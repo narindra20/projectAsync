@@ -1,5 +1,6 @@
 package hei.school.demo.repository.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +27,10 @@ public class Course {
   private UUID id;
 
   private String title;
+
+  @Column(name = "start")
   private Instant start;
+
+  @Column(name = "\"end\"")
   private Instant end;
 }
