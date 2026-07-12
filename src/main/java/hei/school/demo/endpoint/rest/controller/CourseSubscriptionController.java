@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
 public class CourseSubscriptionController {
 
   private final UserRepository userRepository;
@@ -46,14 +48,18 @@ public class CourseSubscriptionController {
     user.getCourses().add(course);
     userRepository.save(user);
 
-    eventProducer.accept(
-        List.of(
-            CourseSubscriptionConfirmationRequested.builder()
-                .userId(user.getId())
-                .courseId(course.getId())
-                .userEmail(user.getEmail())
-                .courseTitle(course.getTitle())
-                .build()));
+    try {
+      eventProducer.accept(
+          List.of(
+              CourseSubscriptionConfirmationRequested.builder()
+                  .userId(user.getId())
+                  .courseId(course.getId())
+                  .userEmail(user.getEmail())
+                  .courseTitle(course.getTitle())
+                  .build()));
+    } catch (Exception e) {
+      log.error("Failed to send event for course subscription confirmation", e);
+    }
 
     return ResponseEntity.ok().build();
   }
