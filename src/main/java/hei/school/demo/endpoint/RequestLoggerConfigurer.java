@@ -9,6 +9,8 @@ import static java.util.stream.Collectors.joining;
 import hei.school.demo.PojaGenerated;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -44,14 +46,27 @@ public class RequestLoggerConfigurer implements WebMvcConfigurer {
       request.setAttribute(THREAD_OLD_NAME, oldThreadName);
       renameFrontalThread(current);
 
+      String contentType = request.getContentType();
+      boolean isMultipart =
+          contentType != null && contentType.toLowerCase().startsWith("multipart/");
+
       String parameters =
-          request.getParameterMap().entrySet().stream()
-              .map(
-                  entry ->
-                      entry.getKey()
-                          + "="
-                          + (entry.getValue() != null ? String.join(",", entry.getValue()) : ""))
-              .collect(joining(";"));
+          isMultipart
+              ? "<multipart request - parameters not logged>"
+              : request.getParameterMap().entrySet().stream()
+                  .map(
+                      entry ->
+                          entry.getKey()
+                              + "="
+                              + (entry.getValue() != null
+                                  ? String.join(
+                                      ",",
+                                      Arrays.stream(entry.getValue())
+                                          .filter(Objects::nonNull)
+                                          .toArray(String[]::new))
+                                  : ""))
+                  .collect(joining(";"));
+
       log.info(
           "preHandle: " + "method={}, uri={}, parameters=[{}], " + "handler={}, oldThreadName={}",
           request.getMethod(),
